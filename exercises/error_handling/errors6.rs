@@ -9,9 +9,8 @@
 // Execute `rustlings hint errors6` or use the `hint` watch subcommand for a
 // hint.
 
-// I AM NOT DONE
 
-use std::num::ParseIntError;
+use std::{error::Error, num::ParseIntError, result};
 
 // This is a custom error type that we will be using in `parse_pos_nonzero()`.
 #[derive(PartialEq, Debug)]
@@ -25,13 +24,34 @@ impl ParsePosNonzeroError {
         ParsePosNonzeroError::Creation(err)
     }
     // TODO: add another error conversion function here.
-    // fn from_parseint...
+    fn from_parseint(err: ParseIntError) -> ParsePosNonzeroError {
+        ParsePosNonzeroError::ParseInt(err)
+    }
+    fn map_err_from_parseint(res: Result<i64, ParseIntError>) -> Result<i64, ParsePosNonzeroError> {
+        res.map_err(ParsePosNonzeroError::from_parseint)
+    }
 }
 
 fn parse_pos_nonzero(s: &str) -> Result<PositiveNonzeroInteger, ParsePosNonzeroError> {
     // TODO: change this to return an appropriate error instead of panicking
     // when `parse()` returns an error.
-    let x: i64 = s.parse().unwrap();
+    // .parse() : try parsing &str to i64
+    // -> Result<i64, ParseIntError>
+    // .map_err(op) : apply op to Err, leaving Ok untouched
+    // -> Result<i64, ParsePosNonzeroError>
+    // ? / .branch() : wrap with ControlFlow, perform an early return of a value
+    // decide whether the operator should produce a value (because this returned ControlFlow::Continue)
+    // or propagate a value back to the *caller* (because this returned ControlFlow::Break).
+    let x: i64 = s.parse().map_err(ParsePosNonzeroError::from_parseint)?;
+
+    // let x: i64 = ParsePosNonzeroError::map_err_from_parseint(s.parse())?;
+
+    // let x: i64 = match s.parse::<i64>() {
+        // Ok(i) => i,
+        // Err(e) => return Err(ParsePosNonzeroError::from_parseint(e)),
+    // };
+
+    
     PositiveNonzeroInteger::new(x).map_err(ParsePosNonzeroError::from_creation)
 }
 

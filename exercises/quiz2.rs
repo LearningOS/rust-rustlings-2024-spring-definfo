@@ -39,7 +39,7 @@ mod my_module {
             match command {
                 Command::Uppercase => output.push(string.to_uppercase()),
                 Command::Trim => output.push(string.trim().to_string()),
-                Command::Append(i) => output.push(string.to_string() + &"bar".repeat(*i)), // Why is i: &usize ?
+                Command::Append(ref i) => output.push(string.to_string() + &"bar".repeat(*i)), // Why is i: &usize ?
             }
         }
         output
