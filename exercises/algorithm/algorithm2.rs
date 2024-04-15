@@ -2,7 +2,6 @@
 	double linked list reverse
 	This problem requires you to reverse a doubly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -46,15 +45,25 @@ impl<T> LinkedList<T> {
         }
     }
 
+    // add obj to the end of LinkedList
     pub fn add(&mut self, obj: T) {
+        // initialise new node
         let mut node = Box::new(Node::new(obj));
         node.next = None;
+        // link node to self.end
         node.prev = self.end;
+        // extract node_ptr (SAFETY?)
         let node_ptr = Some(unsafe { NonNull::new_unchecked(Box::into_raw(node)) });
         match self.end {
+            // case when self.end is None
             None => self.start = node_ptr,
+            // case when self.end is Node
+            // extract end_ptr pointer to self.end
+            // assign node_ptr to endNode.next, which should be dereferenced from end_ptr
+            // (SAFETY?)
             Some(end_ptr) => unsafe { (*end_ptr.as_ptr()).next = node_ptr },
         }
+        // change endNode to node_ptr
         self.end = node_ptr;
         self.length += 1;
     }
@@ -74,6 +83,36 @@ impl<T> LinkedList<T> {
     }
 	pub fn reverse(&mut self){
 		// TODO
+
+        // Operation:
+        // 1. iterate LinkedList
+        // 2. swap(node.next, node.prev)
+        // 4. swap(start, end)
+        
+        // 1. iterate LinkedList (from start)
+        let mut s = self.start;
+        while let Some(node_ptr) = s {
+            // 1. `move` s right by one step
+            s = unsafe {
+                (*node_ptr.as_ptr()).next
+            };
+            unsafe {
+                // .take() -- take NonNull ptr out, leaving None
+                let next = (*node_ptr.as_ptr()).next.take();
+                // 3. swap(node.next, node.prev)
+                (*node_ptr.as_ptr()).next = (*node_ptr.as_ptr()).prev;
+                (*node_ptr.as_ptr()).prev = next;
+            }
+        }
+        // 4. swap(start, end)
+        match self.end.take() {
+            Some(node_ptr) => unsafe {
+                self.end = self.start;
+                self.start = Some(node_ptr);
+            },
+            // special case when end is None
+            None => {},
+        }
 	}
 }
 

@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -11,7 +10,7 @@ use std::vec::*;
 #[derive(Debug)]
 struct Node<T> {
     val: T,
-    next: Option<NonNull<Node<T>>>,
+    next: Option<NonNull<Node<T>>>, // Option wrap -> raw pointer -> Node
 }
 
 impl<T> Node<T> {
@@ -69,14 +68,51 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
+        where T: Clone + std::cmp::PartialOrd  
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        // create a new LinkedList for merge
+        let mut list_merge = LinkedList::new();
+
+        // type conversion for later usage
+        let len_a = list_a.length as i32;
+        let len_b = list_b.length as i32;
+
+        // current index of each LinkedList
+        // range: [0, len[
+        let (mut index_a, mut index_b): (i32, i32) = (0, 0);
+        
+        // loop in two LinkedList, ensuring no `out of range`` error
+        while index_a < len_a && index_b < len_b {
+
+            // Copy trait is necessary for dereference from an immutable reference.
+            let elem_a = list_a.get(index_a).unwrap().clone();
+            let elem_b = list_b.get(index_b).unwrap().clone();
+
+            // PartialOrd trait is necessary for comparison between objects
+            if elem_a < elem_b {
+                list_merge.add(elem_a);
+                index_a += 1;
+            } else {
+                list_merge.add(elem_b);
+                index_b += 1;
+            }
         }
+
+        // special case when len_a != len_b
+        if index_a < len_a {
+            for index in index_a..len_a {
+                let elem = list_a.get(index).unwrap().clone();
+                list_merge.add(elem)
+            }
+        } else if index_b < len_b {
+            for index in index_b..len_b {
+                let elem = list_b.get(index).unwrap().clone();
+                list_merge.add(elem)
+            }
+        }
+        // return the final LinkedList 
+		list_merge
 	}
 }
 
