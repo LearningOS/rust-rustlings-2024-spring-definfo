@@ -87,7 +87,7 @@ impl<T> LinkedList<T> {
         // Operation:
         // 1. iterate LinkedList
         // 2. swap(node.next, node.prev)
-        // 4. swap(start, end)
+        // 3. swap(start, end)
         
         // 1. iterate LinkedList (from start)
         let mut s = self.start;
@@ -98,13 +98,13 @@ impl<T> LinkedList<T> {
             };
             unsafe {
                 // .take() -- take NonNull ptr out, leaving None
-                let next = (*node_ptr.as_ptr()).next.take();
-                // 3. swap(node.next, node.prev)
+                let next_node = (*node_ptr.as_ptr()).next.take();
+                // 2. swap(node.next, node.prev)
                 (*node_ptr.as_ptr()).next = (*node_ptr.as_ptr()).prev;
-                (*node_ptr.as_ptr()).prev = next;
+                (*node_ptr.as_ptr()).prev = next_node;
             }
         }
-        // 4. swap(start, end)
+        // 3. swap(start, end)
         match self.end.take() {
             Some(node_ptr) => unsafe {
                 self.end = self.start;
