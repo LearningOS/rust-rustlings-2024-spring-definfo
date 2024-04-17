@@ -3,7 +3,6 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -51,12 +50,23 @@ where
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
         //TODO
+        let mut root_node = &mut self.root;
+        match root_node {
+            None => self.root = Some(Box::new(TreeNode::new(value))),
+            Some(ptr) => {
+                (*ptr).insert(value);
+            },
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
         //TODO
-        true
+        let root_node = &self.root;
+        match root_node {
+            Some(ptr) => ptr.search(value),
+            None => false,
+        }
     }
 }
 
@@ -66,7 +76,43 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        // Notice type requirement for .cmp()
+        match &value.cmp(&self.value) {
+            // No need to insert if exists
+            Ordering::Equal => return,
+            // Enter left node if less
+            Ordering::Less => match &mut self.left {
+                // Insert at bottom
+                None => self.left = Some(Box::new(TreeNode::new(value))),
+                // Recursively
+                Some(ptr) => ptr.insert(value),
+            },
+            // Enter right node if greater
+            Ordering::Greater => match &mut self.right {
+                // Insert at bottom
+                None => self.right = Some(Box::new(TreeNode::new(value))),
+                Some(ptr) => ptr.insert(value),
+            },
+        }
+    }
+
+    // Helper function for search in the node instead of BST
+    fn search(&self, value: T) -> bool {
+        match value.cmp(&self.value) {
+            Ordering::Equal => true,
+            Ordering::Less => {
+                match &self.left {
+                    Some(ptr) => ptr.search(value),
+                    None => false,
+                }
+            },
+            Ordering::Greater => {
+                match &self.right {
+                    Some(ptr) => ptr.search(value),
+                    None => false,
+                }
+            },
+        }
     }
 }
 
