@@ -2,7 +2,6 @@
 	queue
 	This question requires you to use queues to implement the functionality of the stac
 */
-// I AM NOT DONE
 
 #[derive(Debug)]
 pub struct Queue<T> {
@@ -66,16 +65,49 @@ impl<T> myStack<T> {
 			q2:Queue::<T>::new()
         }
     }
+    // Ensure stack order after each push operation
+    // Use cache queue for O(sqrt(n)) time consumption in push
     pub fn push(&mut self, elem: T) {
-        //TODO
+        // Get current size of each queue
+        let size1 = self.q1.size();
+        let size2 = self.q2.size();
+        // Push into q1 directly when q1 is short
+        if size1.pow(2) <= size2 {
+            // Enqueue in q1
+            self.q1.enqueue(elem);
+            // Rearrange original elems q1 in stack order
+            for _ in 0..size1 {
+                let front_elem = self.q1.dequeue().unwrap();
+                self.q1.enqueue(front_elem);
+            }
+        // Cache into q2 when q1 is too long
+        } else {
+            // Enqueue in q2
+            self.q2.enqueue(elem);
+            // Move all elems in q1 into q2
+            for _ in 0..size1 {
+                let front_elem = self.q1.dequeue().unwrap();
+                self.q2.enqueue(front_elem);
+            }
+            // Rearrange original elems in q2 in stack order
+            for _ in 0..size2 {
+                let front_elem = self.q2.dequeue().unwrap();
+                self.q2.enqueue(front_elem);
+            }
+        }
     }
     pub fn pop(&mut self) -> Result<T, &str> {
-        //TODO
-		Err("Stack is empty")
+        match self.q1.is_empty() {
+            true => match self.q2.is_empty() {
+                true => Err("Stack is empty"),
+                false => self.q2.dequeue(),
+            }
+            false => self.q1.dequeue(),
+        }
     }
     pub fn is_empty(&self) -> bool {
 		//TODO
-        true
+        self.q1.is_empty() && self.q2.is_empty()
     }
 }
 

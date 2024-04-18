@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -14,6 +13,7 @@ where
     count: usize,
     items: Vec<T>,
     comparator: fn(&T, &T) -> bool,
+    stat: Vec<bool>,
 }
 
 impl<T> Heap<T>
@@ -23,8 +23,12 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
+            // Default value in items
+            // Below operations start at index = 1
             items: vec![T::default()],
             comparator,
+            // Iterator visit status
+            stat: vec![true],
         }
     }
 
@@ -37,7 +41,22 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // Special case when heap is empty or insert at the end
+        if self.is_empty() || !(self.comparator)(&value, &self.items[self.len()]) {
+            self.items.push(value);
+            self.stat.push(false);
+        // If the comparator returns true, value becomes the heap root
+        } else {
+        // Possible optimization: binary search
+            for i in 1..(self.len() + 1) {
+                if (self.comparator)(&value, &self.items[i]) {
+                    self.items.insert(i, value);
+                    self.stat.insert(i, false);
+                }
+                break;
+            }
+        }
+        self.count += 1;
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -58,6 +77,7 @@ where
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
         //TODO
+        // For what?
 		0
     }
 }
@@ -79,13 +99,19 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default + Copy,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        // Unchecked
+        for (i, &s) in self.stat.iter().enumerate() {
+            if !s {
+                self.stat[i] = true;
+                return Some(self.items[i]);
+            }
+        }
+        None
     }
 }
 
