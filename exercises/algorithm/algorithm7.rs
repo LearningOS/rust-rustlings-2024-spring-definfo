@@ -3,7 +3,8 @@
 	This question requires you to use a stack to achieve a bracket match
 */
 
-// I AM NOT DONE
+use std::collections::HashSet;
+
 #[derive(Debug)]
 struct Stack<T> {
 	size: usize,
@@ -27,12 +28,18 @@ impl<T> Stack<T> {
 		self.data.clear();
 	}
 	fn push(&mut self, val: T) {
+		// Add at the end of vec
 		self.data.push(val);
 		self.size += 1;
 	}
 	fn pop(&mut self) -> Option<T> {
-		// TODO
-		None
+		// Remove at the end of vec
+		if self.data.is_empty() {
+			return None;
+		} else {
+			self.size -= 1;
+			return self.data.pop();
+		}
 	}
 	fn peek(&self) -> Option<&T> {
 		if 0 == self.size {
@@ -102,7 +109,36 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 fn bracket_match(bracket: &str) -> bool
 {
 	//TODO
-	true
+	let mut char_stack = Stack::<char>::new();
+	let bracket_set = HashSet::<char>::from( ['(', ')', '[', ']', '{' ,'}']);
+	for c in bracket.chars() {
+		// Should only push valid bracket
+		if bracket_set.contains(&c) {
+			// Short-circuit case
+			if char_stack.is_empty() {
+				char_stack.push(c);
+			} else {
+				// Eliminate matched bracket pair at the bottom
+				let top_c = char_stack.data[char_stack.len() - 1];
+				match c {
+				')' => if top_c == '(' {
+					char_stack.pop();
+				},
+				']' => if top_c == '[' {
+					char_stack.pop();
+				},
+				'}' => if top_c == '{' {
+					char_stack.pop();
+				},
+				// Otherwise, simply push into stack
+				_ => char_stack.push(c),
+				}
+			}
+		}
+	}
+	char_stack.is_empty()
+
+	// Check if stack is empty
 }
 
 #[cfg(test)]
